@@ -1,0 +1,24 @@
+{
+  "name": "rhubarbphp/module-leaf-tabs",
+  "description": "Leaf patterns for HTML 5 uploads.",
+  "keywords": [
+    "html5",
+    "upload",
+    "mvp",
+    "presenter",
+    "leaf",
+    "rhubarb",
+    "php",
+    "framework"
+  ],
+  "homepage": "http://www.rhubarbphp.com/",
+  "license": "Apache-2.0",
+  "autoload": {
+    "psr-4": {
+      "Rhubarb\\Leaf\\Controls\\Html5Upload\\": "src/"
+    }
+  },
+  "require": {
+    "rhubarbphp/module-leaf-common-controls": "^1.0.0"
+  }
+}
