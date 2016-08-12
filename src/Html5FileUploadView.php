@@ -19,16 +19,37 @@
 namespace Rhubarb\Leaf\Controls\Html5Upload;
 
 use Rhubarb\Leaf\Controls\Common\FileUpload\SimpleFileUploadView;
+use Rhubarb\Leaf\Leaves\LeafDeploymentPackage;
 use Rhubarb\Leaf\Views\View;
-
-/**
- * Created by PhpStorm.
- * User: Luke
- * Date: 05/08/2016
- * Time: 14:26
- */
 
 class Html5FileUploadView extends SimpleFileUploadView
 {
-    
+    protected $requiresContainer = true;
+    protected $requiresStateInputs = true;
+
+    protected function getViewBridgeName()
+    {
+        return "Html5FileUploadViewBridge";
+    }
+
+    public function getDeploymentPackage()
+    {
+        $package = parent::getDeploymentPackage();
+        $package->resourcesToDeploy[] = __DIR__ . "/Html5FileUploadViewBridge.js";
+        return $package;
+    }
+
+    protected function printUploadContent()
+    {
+        $accepts = "";
+
+        if (sizeof($this->filters) > 0){
+            $accepts = " accept = \"" . implode(",", $this->filters) . "\"";
+        }
+        ?>
+        <input type="file" name="<?= $this->model->leafName; ?>[]"
+               id="<?= $this->model->leafPath; ?>"
+               leaf-name="<?= $this->model->leafName ?>" <?= $accepts; ?> multiple="multiple"/>
+        <?php
+    }
 }

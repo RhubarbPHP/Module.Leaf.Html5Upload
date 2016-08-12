@@ -1,19 +1,8 @@
 <?php
-/**
- * Copyright (c) 2016 RhubarbPHP.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
+namespace Rhubarb\Leaf\Controls\Html5Upload;
+use Rhubarb\Leaf\Controls\Common\FileUpload\SimpleFileUpload;
+use Rhubarb\Leaf\Controls\Html5Upload\Html5FileUploadView;
 use Rhubarb\Leaf\Leaves\Leaf;
 
 /**
@@ -22,8 +11,13 @@ use Rhubarb\Leaf\Leaves\Leaf;
  * Date: 05/08/2016
  * Time: 14:26
  */
-class Html5FileUpload extends Leaf
+class Html5FileUpload extends SimpleFileUpload
 {
+
+    /**
+     * @var Html5FileUploadModel
+     */
+    protected $model;
 
     /**
      * Returns the name of the standard view used for this leaf.
@@ -32,16 +26,20 @@ class Html5FileUpload extends Leaf
      */
     protected function getViewClass()
     {
-        // TODO: Implement getViewClass() method.
+        return Html5FileUploadView::class;
     }
 
-    /**
-     * Should return a class that derives from LeafModel
-     *
-     * @return \Rhubarb\Leaf\Leaves\LeafModel
-     */
     protected function createModel()
     {
-        // TODO: Implement createModel() method.
+        return new Html5FileUploadModel();
+    }
+
+    protected function onModelCreated()
+    {
+        parent::onModelCreated();
+
+        $this->model->fileUploadedEvent->attachHandler(function(...$file){
+            $this->fileUploadedEvent->raise(...$file);
+        });
     }
 }
