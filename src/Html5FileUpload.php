@@ -2,6 +2,7 @@
 
 namespace Rhubarb\Leaf\Controls\Html5Upload;
 use Rhubarb\Leaf\Controls\Common\FileUpload\SimpleFileUpload;
+use Rhubarb\Leaf\Controls\Common\FileUpload\SimpleFileUploadExample;
 use Rhubarb\Leaf\Controls\Html5Upload\Html5FileUploadView;
 use Rhubarb\Leaf\Leaves\Leaf;
 
