@@ -185,6 +185,10 @@ bridge.prototype.updateUploadProgressIndicator = function (progressIndicator, pr
 bridge.prototype.getLabelHtml = function(progressDetails) {
     if (this.model.displayType == ""){
         return "";
+    } else if (this.model.displayType == "percentage") {
+        return "progress: " + progressDetails.percentage + "%";
+    } else if (this.model.displayType == "filename") {
+        return "uploading " + progressDetails.name + " now";
     } else {
         return "speed: " + progressDetails.speed;
     }
