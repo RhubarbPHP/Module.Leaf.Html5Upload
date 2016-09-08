@@ -28,6 +28,7 @@ class Html5FileUploadModel extends SimpleFileUploadModel
      * @var Event
      */
     public $fileUploadedEvent;
+    public $displayType = null;
 
     public function __construct()
     {
@@ -35,4 +36,14 @@ class Html5FileUploadModel extends SimpleFileUploadModel
 
         $this->fileUploadedEvent = new Event();
     }
+
+    protected function getExposableModelProperties()
+    {
+        $list = parent::getExposableModelProperties();
+        $list[] = "displayType";
+
+        return $list;
+    }
+
+
 }

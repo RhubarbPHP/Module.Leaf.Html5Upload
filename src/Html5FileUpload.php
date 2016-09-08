@@ -19,7 +19,6 @@ class Html5FileUpload extends SimpleFileUpload
      * @var Html5FileUploadModel
      */
     protected $model;
-
     /**
      * Returns the name of the standard view used for this leaf.
      *
@@ -38,9 +37,16 @@ class Html5FileUpload extends SimpleFileUpload
     protected function onModelCreated()
     {
         parent::onModelCreated();
+        $
 
         $this->model->fileUploadedEvent->attachHandler(function(...$file){
             $this->fileUploadedEvent->raise(...$file);
         });
     }
+
+    protected function setDisplayType($displayType)
+    {
+        $this->model->displayType = $displayType;
+    }
+
 }

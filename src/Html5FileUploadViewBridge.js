@@ -183,7 +183,11 @@ bridge.prototype.updateUploadProgressIndicator = function (progressIndicator, pr
 };
 
 bridge.prototype.getLabelHtml = function(progressDetails) {
-    return "speed: " + progressDetails.speed;
+    if (this.model.displayType == ""){
+        return "";
+    } else {
+        return "speed: " + progressDetails.speed;
+    }
 };
 
 /**
