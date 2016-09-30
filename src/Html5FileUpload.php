@@ -1,6 +1,8 @@
 <?php
 
 namespace Rhubarb\Leaf\Controls\Html5Upload;
+use Rhubarb\Crown\Request\Request;
+use Rhubarb\Crown\Request\WebRequest;
 use Rhubarb\Leaf\Controls\Common\FileUpload\SimpleFileUpload;
 use Rhubarb\Leaf\Controls\Common\FileUpload\SimpleFileUploadExample;
 use Rhubarb\Leaf\Controls\Html5Upload\Html5FileUploadView;
@@ -35,8 +37,12 @@ class Html5FileUpload extends SimpleFileUpload
         parent::onModelCreated();
 
         $this->model->fileUploadedEvent->attachHandler(function(...$file){
-            $this->fileUploadedEvent->raise(...$file);
+            return $this->parseRequestForFiles(Request::current());
         });
+    }
+
+    protected function parserForFiles(WebRequest $request)
+    {
     }
 
     public function setDisplayType($displayType)
