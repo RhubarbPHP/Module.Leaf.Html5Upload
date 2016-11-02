@@ -24,7 +24,7 @@ class Html5FileUploadModel extends SimpleFileUploadModel
 {
     /**
      * Raised when the view bridge pushes us a file.
-     * 
+     *
      * @var Event
      */
     public $fileUploadedEvent;
@@ -44,6 +44,4 @@ class Html5FileUploadModel extends SimpleFileUploadModel
 
         return $list;
     }
-
-
 }

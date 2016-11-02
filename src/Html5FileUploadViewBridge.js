@@ -14,23 +14,16 @@ bridge.prototype.onStateLoaded = function () {
 bridge.prototype.supportsHtml5Uploads = function () {
     var xhr = new XMLHttpRequest();
 
-    if (!xhr.upload || !window.File || !window.FileList || !window.FileReader) {
-        return false;
-    }
-
-    return true;
+    return !(!xhr.upload || !window.File || !window.FileList || !window.FileReader);
 };
 
 bridge.prototype.attachEvents = function () {
-    this.uploadInput = this.viewNode;
-
-    var self = this;
-
     if (this.supportsHtml5Uploads()) {
         this.createUploadProgressIndicatorContainer();
 
-        this.uploadInput.addEventListener("change", function () {
-            self.filesSelected(this.files);
+        var self = this;
+        this.viewNode.addEventListener("change", function () {
+            self.onFilesSelected(this.files);
         }, false);
     }
 };
@@ -45,38 +38,43 @@ bridge.prototype.createUploadProgressIndicatorContainer = function () {
     this.viewNode.parentNode.insertBefore(this.uploadProgressIndicatorContainer, this.viewNode);
 };
 
+bridge.prototype.onFilesSelected = function (files) {
+    for (var i = 0; i < files.length; i++) {
+        this.uploadFile(files.item(i));
+    }
+};
 
+bridge.prototype.uploadFile = function (file) {
+    // Initialisation of variables for upload speed calculation:
+    var displaySpeed = "calculating";
+    var amountLoadedSoFarOld = 0;
+    var timeOld = Date.now();
 
-bridge.prototype.filesSelected = function (files) {
-    var self = this;
-    var uploadFunction = function (file) {
-        // Initialisation of variables for upload speed calculation:
-        var displaySpeed = "calculating";
-        var amountLoadedSoFarOld = 0;
-        var timeOld = Date.now();
-
-        var request = self.sendFileAsServerEvent("fileUploaded", file, function (e) {
+    return this.sendFileAsServerEvent(
+        "fileUploaded",
+        file,
+        function (e) {
             var currentTime = Date.now();
-            if((currentTime - timeOld) > 333){
+            if ((currentTime - timeOld) > 333) {
                 var amountLoadedSoFarNew = e.loaded;
                 var differenceInAmountUploaded = amountLoadedSoFarNew - amountLoadedSoFarOld;
                 var timeNew = currentTime;
                 var differenceInTime = timeNew - timeOld;
 
-                var speed = differenceInAmountUploaded/(differenceInTime);
+                var speed = differenceInAmountUploaded / (differenceInTime);
 
                 // Ensures the upload speed is displayed as a number between 1 and 1000 with correct units
                 var units = 0;
-                while(1 > speed || 999 < speed){
-                    if (1 > speed){
+                while (1 > speed || 999 < speed) {
+                    if (1 > speed) {
                         units--;
-                    } else{
+                    } else {
                         units++;
                     }
-                    speed/=1000;
+                    speed /= 1000;
                 }
                 var displayUnits;
-                switch (units){
+                switch (units) {
                     case -1:
                         displayUnits = " b/s";
                         break;
@@ -88,7 +86,7 @@ bridge.prototype.filesSelected = function (files) {
                         break;
                     case 2:
                         displayUnits = " Gb/s";
-                    break;
+                        break;
                 }
                 displaySpeed = parseFloat(speed).toPrecision(3) + displayUnits;
 
@@ -97,8 +95,7 @@ bridge.prototype.filesSelected = function (files) {
                 amountLoadedSoFarOld = amountLoadedSoFarNew;
             }
 
-            var progress =
-            {
+            var progress = {
                 "name": file.name,
                 "position": e.loaded,
                 "length": e.total,
@@ -107,21 +104,20 @@ bridge.prototype.filesSelected = function (files) {
             };
 
             if (!file.uploadProgressDom) {
-                file.uploadProgressDom = self.createUploadProgressIndicator();
-                self.attachUploadProgressIndicator(file.uploadProgressDom);
+                file.uploadProgressDom = this.createUploadProgressIndicator();
+                this.attachUploadProgressIndicator(file.uploadProgressDom);
             }
 
-            self.updateUploadProgressIndicator(file.uploadProgressDom, progress);
-
-        }, function (response) {
+            this.updateUploadProgressIndicator(file.uploadProgressDom, progress);
+        }.bind(this),
+        function (response) {
             if (file.uploadProgressDom) {
-                self.onUploadComplete(file.uploadProgressDom);
+                this.onUploadComplete(file.uploadProgressDom);
             }
 
-            self.raiseClientEvent("UploadComplete", file, response);
-        });
-        self.request = request;
-    }(files[0]);
+            this.raiseClientEvent("UploadComplete", file, response);
+        }.bind(this)
+    );
 };
 
 /**
@@ -143,10 +139,9 @@ bridge.prototype.createUploadProgressIndicator = function () {
     var cancel = document.createElement("a");
     cancel.className = "c-button c-button--neg c-button--small cancel";
     cancel.innerHTML = "Cancel Upload";
-    cancel.onclick = function ()
-    {
+    cancel.onclick = function () {
         var confirmAbort = confirm("Are you sure you want to cancel the upload?");
-        if(confirmAbort) {
+        if (confirmAbort) {
             self.request.abort();
             upiDom.style.display = "none";
             self.viewNode.style.display = "block";
@@ -182,8 +177,8 @@ bridge.prototype.updateUploadProgressIndicator = function (progressIndicator, pr
     this.viewNode.style.display = "none";
 };
 
-bridge.prototype.getLabelHtml = function(progressDetails) {
-    if (this.model.displayType == ""){
+bridge.prototype.getLabelHtml = function (progressDetails) {
+    if (this.model.displayType == "") {
         return "";
     } else if (this.model.displayType == "percentage") {
         return "progress: " + progressDetails.percentage + "%";
