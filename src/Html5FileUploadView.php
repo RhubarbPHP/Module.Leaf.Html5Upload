@@ -19,8 +19,6 @@
 namespace Rhubarb\Leaf\Controls\Html5Upload;
 
 use Rhubarb\Leaf\Controls\Common\FileUpload\SimpleFileUploadView;
-use Rhubarb\Leaf\Leaves\LeafDeploymentPackage;
-use Rhubarb\Leaf\Views\View;
 
 class Html5FileUploadView extends SimpleFileUploadView
 {
@@ -29,27 +27,25 @@ class Html5FileUploadView extends SimpleFileUploadView
 
     protected function getViewBridgeName()
     {
-        return "Html5FileUploadViewBridge";
+        return 'Html5FileUploadViewBridge';
     }
 
     public function getDeploymentPackage()
     {
         $package = parent::getDeploymentPackage();
-        $package->resourcesToDeploy[] = __DIR__ . "/Html5FileUploadViewBridge.js";
+        $package->resourcesToDeploy[] = __DIR__ . '/Html5FileUploadViewBridge.js';
         return $package;
     }
 
-    protected function printUploadContent()
+    protected function printViewContent()
     {
-        $accepts = "";
+        $this->model->addHtmlAttribute('multiple', 'multiple');
 
-        if (sizeof($this->filters) > 0){
-            $accepts = " accept = \"" . implode(",", $this->filters) . "\"";
-        }
-        ?>
-        <input type="file" name="<?= $this->model->leafName; ?>[]"
-               id="<?= $this->model->leafPath; ?>"
-               leaf-name="<?= $this->model->leafName ?>" <?= $accepts; ?> multiple="multiple"/>
-        <?php
+        parent::printViewContent();
+    }
+
+    protected function getInputName()
+    {
+        return $this->model->leafPath . '[]';
     }
 }
