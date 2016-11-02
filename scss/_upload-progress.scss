@@ -1,0 +1,22 @@
+.upload-progress-container {
+	line-height: normal;
+
+	.upload-progress {
+		height: 20px;
+		margin-bottom: 5px;
+	}
+	._gauge {
+		width: 200px;
+		display: inline-block;
+		border: 1px solid grey;
+		height: 100%;
+		padding: 1px;
+	}
+	._needle {
+		height: 100%;
+		background-color: grey;
+	}
+	label {
+		padding-left: 5px;
+	}
+}
