@@ -76,16 +76,16 @@ bridge.prototype.uploadFile = function (file) {
                 var displayUnits;
                 switch (units) {
                     case -1:
-                        displayUnits = " b/s";
+                        displayUnits = "b/s";
                         break;
                     case 0:
-                        displayUnits = " Kb/s";
+                        displayUnits = "Kb/s";
                         break;
                     case 1:
-                        displayUnits = " Mb/s";
+                        displayUnits = "Mb/s";
                         break;
                     case 2:
-                        displayUnits = " Gb/s";
+                        displayUnits = "Gb/s";
                         break;
                 }
                 displaySpeed = parseFloat(speed).toPrecision(3) + displayUnits;
@@ -116,7 +116,10 @@ bridge.prototype.uploadFile = function (file) {
             }
 
             this.raiseClientEvent("UploadComplete", file, response);
-        }.bind(this)
+        }.bind(this),
+        function (response) {
+            this.raiseClientEvent("UploadFailed", file, response);
+        }
     );
 };
 
