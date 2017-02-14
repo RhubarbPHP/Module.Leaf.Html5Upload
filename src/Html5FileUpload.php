@@ -41,12 +41,8 @@ class Html5FileUpload extends SimpleFileUpload
         });
     }
 
-    protected function parserForFiles(WebRequest $request)
+    public function setProgressLabelType($displayType)
     {
+        $this->model->progressLabelType = $displayType;
     }
-
-    public function setDisplayType($displayType)
-     {
-         $this->model->displayType = $displayType;
-     }
 }

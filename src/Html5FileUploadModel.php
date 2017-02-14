@@ -28,7 +28,8 @@ class Html5FileUploadModel extends SimpleFileUploadModel
      * @var Event
      */
     public $fileUploadedEvent;
-    public $displayType = null;
+    
+    public $progressLabelType = null;
 
     public function __construct()
     {

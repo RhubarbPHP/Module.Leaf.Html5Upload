@@ -1,238 +1,296 @@
-var bridge = function (presenterPath) {
-    window.rhubarb.viewBridgeClasses.SimpleFileUploadViewBridge.apply(this, arguments);
-};
 
-bridge.prototype = new window.rhubarb.viewBridgeClasses.SimpleFileUploadViewBridge();
-bridge.prototype.constructor = bridge;
+window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
+    return {
+        onReady: function () {
+            parent.onReady();
+            if (this.supportsHtml5Uploads()) {
 
-bridge.prototype.onStateLoaded = function () {
-    if (!this.model.MaxFileSize) {
-        this.model.MaxFileSize = 5 * 1024 * 1024;
-    }
-};
+                this.originalFileInput = this.viewNode;
 
-bridge.prototype.supportsHtml5Uploads = function () {
-    var xhr = new XMLHttpRequest();
+                // An array of files to upload.
+                this.filesToUpload = [];
+                this.activeUploadIndex = -1;
 
-    return !(!xhr.upload || !window.File || !window.FileList || !window.FileReader);
-};
+                this.createUploadProgressIndicatorContainer();
 
-bridge.prototype.attachEvents = function () {
-    if (this.supportsHtml5Uploads()) {
-        this.createUploadProgressIndicatorContainer();
+                var self = this;
+                this.originalFileInput.addEventListener("change", function () {
+                    self.onFilesSelected(this.files);
+                    self.originalFileInput.value = '';
+                }, false);
+            }
+        },
+        createUploadProgressIndicatorContainer: function () {
+            this.uploadProgressIndicatorContainer = document.createElement("div");
+            this.uploadProgressIndicatorContainer.className = "upload-progress-container";
 
-        var self = this;
-        this.viewNode.addEventListener("change", function () {
-            self.onFilesSelected(this.files);
-        }, false);
-    }
-};
+            this.originalFileInput.parentNode.insertBefore(
+                this.uploadProgressIndicatorContainer,
+                this.originalFileInput);
+        },
+        updateDom: function(){
+            if (this.uploading){
+                var activeUpload = this.filesToUpload[this.activeUploadIndex];
 
-/**
- * Should create the container used for appending upload progress indicators.
- */
-bridge.prototype.createUploadProgressIndicatorContainer = function () {
-    this.uploadProgressIndicatorContainer = document.createElement("div");
-    this.uploadProgressIndicatorContainer.className = "upload-progress-container";
-
-    this.viewNode.parentNode.insertBefore(this.uploadProgressIndicatorContainer, this.viewNode);
-};
-
-bridge.prototype.onFilesSelected = function (files) {
-    for (var i = 0; i < files.length; i++) {
-        this.uploadFile(files.item(i));
-    }
-};
-
-bridge.prototype.uploadFile = function (file) {
-    // Initialisation of variables for upload speed calculation:
-    var displaySpeed = "calculating";
-    var amountLoadedSoFarOld = 0;
-    var timeOld = Date.now();
-
-    return this.sendFileAsServerEvent(
-        "fileUploaded",
-        file,
-        function (e) {
-            var currentTime = Date.now();
-            if ((currentTime - timeOld) > 333) {
-                var amountLoadedSoFarNew = e.loaded;
-                var differenceInAmountUploaded = amountLoadedSoFarNew - amountLoadedSoFarOld;
-                var timeNew = currentTime;
-                var differenceInTime = timeNew - timeOld;
-
-                var speed = differenceInAmountUploaded / (differenceInTime);
-
-                // Ensures the upload speed is displayed as a number between 1 and 1000 with correct units
-                var units = 0;
-                while (1 > speed || 999 < speed) {
-                    if (1 > speed) {
-                        units--;
-                    } else {
-                        units++;
-                    }
-                    speed /= 1000;
+                if (!this.uploadProgressIndicator){
+                    this.uploadProgressIndicator = this.createUploadProgressIndicator();
+                    this.uploadProgressIndicatorContainer.appendChild(this.uploadProgressIndicator);
                 }
-                var displayUnits;
-                switch (units) {
-                    case -1:
-                        displayUnits = "b/s";
-                        break;
-                    case 0:
-                        displayUnits = "Kb/s";
-                        break;
-                    case 1:
-                        displayUnits = "Mb/s";
-                        break;
-                    case 2:
-                        displayUnits = "Gb/s";
-                        break;
-                }
-                displaySpeed = parseFloat(speed).toPrecision(3) + displayUnits;
 
-                // Updates for the next cycle
-                timeOld = timeNew;
-                amountLoadedSoFarOld = amountLoadedSoFarNew;
+                this.updateUploadProgressIndicator(this.uploadProgressIndicator, activeUpload.progress);
+                this.uploadProgressIndicator.style.display = 'block';
+                this.originalFileInput.style.display = 'none';
+            } else {
+
+                if (this.uploadProgressIndicator) {
+                    this.uploadProgressIndicator.style.display = 'none';
+                }
+
+                this.originalFileInput.style.display = 'block';
+            }
+        },
+        updateUploadProgressIndicator: function (progressIndicator, progressDetails) {
+            progressIndicator.needle.style.width = progressDetails.percentage + "%";
+            progressIndicator.label.innerHTML = progressDetails.name;
+            progressIndicator.speed.innerHTML =
+                (progressDetails.speed) ?
+                    this.formatSpeed(progressDetails.speed) :
+                    '';
+            progressIndicator.remaining.innerHTML =
+                (progressDetails.remaining) ?
+                    this.formatRemaining(progressDetails.remaining) + ' remaining' :
+                    '';
+            progressIndicator.overall.innerHTML = (this.activeUploadIndex + 1) + ' of ' + this.filesToUpload.length;
+        },
+        onFilesSelected: function (files) {
+            for (var i = 0; i < files.length; i++) {
+                this.filesToUpload.push(files[i]);
             }
 
-            var progress = {
-                "name": file.name,
-                "position": e.loaded,
-                "length": e.total,
-                "percentage": parseInt(( e.loaded / e.total ) * 100),
-                "speed": displaySpeed
+            this.uploadNextFile();
+        },
+        onUploadComplete: function (progressIndicator) {
+            progressIndicator.classList.add("-is-complete");
+            progressIndicator.cancel.style.display = "none";
+            progressIndicator.upiLabel.innerHTML = "Complete";
+            var self = this;
+            setTimeout(function () {
+                progressIndicator.parentNode.removeChild(progressIndicator);
+                self.viewNode.style.display = "block";
+            }, 1500);
+        },
+        clearQueue: function(){
+            this.activeUploadIndex = -1;
+            this.filesToUpload = [];
+        },
+        createUploadProgressIndicator: function () {
+            var self = this;
+            var upiDom = document.createElement("div");
+            upiDom.className = "upload-progress";
+
+            var upiGauge = document.createElement("div");
+            upiGauge.className = "_gauge";
+
+            var upiNeedle = document.createElement("div");
+            upiNeedle.className = "_needle";
+
+            var upiDetails = document.createElement('div');
+            var upiLabel = document.createElement("span");
+            var upiSpeed = document.createElement("span");
+            var upiOverall = document.createElement("span");
+            var upiRemaining = document.createElement("span");
+
+            var cancel = document.createElement("a");
+            cancel.className = "c-button c-button--neg c-button--small cancel";
+            cancel.innerHTML = "Cancel Upload";
+            cancel.onclick = function () {
+                var confirmAbort = confirm("Are you sure you want to cancel the upload?");
+                if (confirmAbort) {
+                    self.request.abort();
+                    this.clearQueue();
+                    this.updateDom();
+                }
             };
 
-            if (!file.uploadProgressDom) {
-                file.uploadProgressDom = this.createUploadProgressIndicator();
-                this.attachUploadProgressIndicator(file.uploadProgressDom);
+            upiGauge.appendChild(upiNeedle);
+
+            upiDetails.appendChild(upiLabel);
+            upiDetails.appendChild(upiSpeed);
+            upiDetails.appendChild(upiRemaining);
+            upiDetails.appendChild(upiOverall);
+
+            upiDom.appendChild(upiGauge);
+            upiDom.appendChild(upiDetails);
+            upiDom.appendChild(cancel);
+
+            // Put the sub elements on the parent as direct children for faster access later.
+            upiDom.needle = upiNeedle;
+            upiDom.details = upiDetails;
+            upiDom.speed = upiSpeed;
+            upiDom.overall = upiOverall;
+            upiDom.label = upiLabel;
+            upiDom.remaining = upiRemaining;
+            upiDom.cancel = cancel;
+            return upiDom;
+        },
+        supportsHtml5Uploads: function () {
+            var xhr = new XMLHttpRequest();
+
+            return !(!xhr.upload || !window.File || !window.FileList || !window.FileReader);
+        },
+        uploadNextFile: function() {
+            this.uploading = false;
+
+            this.activeUploadIndex++;
+
+            if (this.activeUploadIndex >= this.filesToUpload.length){
+                this.clearQueue();
+            } else {
+                this.uploadFile(this.filesToUpload[this.activeUploadIndex]);
             }
 
-            this.updateUploadProgressIndicator(file.uploadProgressDom, progress);
-        }.bind(this),
-        function (response) {
-            if (file.uploadProgressDom) {
-                this.onUploadComplete(file.uploadProgressDom);
+            this.updateDom();
+        },
+        calculateSpeed: function(previousBytesUploaded, previousTime, currentBytesUploaded) {
+            var currentTime = Date.now();
+
+            if ((currentTime - previousTime) > 333) {
+                var recentBytes = currentBytesUploaded - previousBytesUploaded;
+                var seconds = currentTime - previousTime;
+
+                var speed = recentBytes / (seconds);
+
+                return speed * 1000;
             }
 
-            this.raiseClientEvent("UploadComplete", file, response);
-        }.bind(this),
-        function (response) {
-            this.raiseClientEvent("UploadFailed", file, response);
-        }
-    );
-};
+            return false;
+        },
+        formatRemaining: function(seconds){
+            var levels = [
+                [Math.floor(seconds / 31536000), 'years'],
+                [Math.floor((seconds % 31536000) / 86400), 'days'],
+                [Math.floor(((seconds % 31536000) % 86400) / 3600), 'hours'],
+                [Math.floor((((seconds % 31536000) % 86400) % 3600) / 60), 'minutes'],
+                [(((seconds % 31536000) % 86400) % 3600) % 60, 'seconds'],
+            ];
+            var returntext = '';
 
-/**
- * Called to create the DOM for a progress indicator.
- */
-bridge.prototype.createUploadProgressIndicator = function () {
-    var self = this;
-    var upiDom = document.createElement("div");
-    upiDom.className = "upload-progress";
+            for (var i = 0, max = levels.length; i < max; i++) {
+                if ( levels[i][0] === 0 ) {
+                    continue;
+                }
+                returntext += ' ' + levels[i][0] + ' ' + (levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length-1): levels[i][1]);
+            };
+            return returntext.trim();
+        },
+        formatSpeed: function(speed){
+            if (!speed){
+                return false;
+            }
 
-    var upiGauge = document.createElement("div");
-    upiGauge.className = "_gauge";
+            // Ensures the upload speed is displayed as a number between 1 and 1000 with correct units
+            var units = 0;
+            while (speed > 1000) {
+                speed /= 1000;
+                units++;
+            }
 
-    var upiNeedle = document.createElement("div");
-    upiNeedle.className = "_needle";
+            var displayUnits;
 
-    var upiLabel = document.createElement("label");
+            switch (units) {
+                case 0:
+                    displayUnits = "b/s";
+                    speed = parseInt(speed);
+                    break;
+                case 1:
+                    displayUnits = "Kb/s";
+                    speed = parseInt(speed);
+                    break;
+                case 2:
+                    displayUnits = "Mb/s";
+                    speed = parseFloat(speed).toPrecision(3);
+                    break;
+                case 3:
+                    displayUnits = "Gb/s";
+                    speed = parseFloat(speed).toPrecision(3);
+                    break;
+            }
 
-    var cancel = document.createElement("a");
-    cancel.className = "c-button c-button--neg c-button--small cancel";
-    cancel.innerHTML = "Cancel Upload";
-    cancel.onclick = function () {
-        var confirmAbort = confirm("Are you sure you want to cancel the upload?");
-        if (confirmAbort) {
-            self.request.abort();
-            upiDom.style.display = "none";
-            self.viewNode.style.display = "block";
+            return speed + displayUnits;
+        },
+        calculateSecondsRemaining: function(speed, bytesToGo) {
+            if (!speed){
+                return false;
+            }
+
+            return Math.round(bytesToGo / speed);
+        },
+        uploadFile: function (file) {
+            // Initialisation of variables for upload speed calculation:
+            var displaySpeed = false;
+            var totalUploaded = 0;
+            var previousTime = Date.now();
+            var lastSpeed = false;
+
+            this.uploading = true;
+
+            // Put a progress structure onto the file upload itself.
+            file.progress = {
+                "name": file.name,
+                "position": 0,
+                "length": file.length,
+                "percentage": 0,
+                "speed": false,
+                "remaining": false
+            };
+
+            this.request = this.sendFileAsServerEvent(
+                "fileUploaded",
+                file,
+                function (e) {
+                    var speed = this.calculateSpeed(totalUploaded, previousTime, e.loaded);
+
+                    if (speed){
+                        // Updates for the next cycle
+                        previousTime = Date.now();
+                        totalUploaded = e.loaded;
+                        lastSpeed = speed;
+                    } else {
+                        speed = lastSpeed;
+                    }
+
+                    // Update progress structure on the file upload itself.
+                    file.progress = {
+                        "name": file.name,
+                        "position": e.loaded,
+                        "length": e.total,
+                        "percentage": parseInt(( e.loaded / e.total ) * 100),
+                        "speed": speed,
+                        "remaining": this.calculateSecondsRemaining(speed, e.total - e.loaded)
+                    };
+
+                    this.updateDom();
+                }.bind(this),
+                // On complete
+                function (response) {
+                    if (file.uploadProgressDom) {
+                        this.onUploadComplete(file.uploadProgressDom);
+                    }
+
+                    this.uploadNextFile();
+                    this.raiseClientEvent("UploadComplete", file, response);
+                }.bind(this),
+                // On failure
+                function (response) {
+
+                    this.uploadNextFile();
+                    this.raiseClientEvent("UploadFailed", file, response);
+                }
+            );
+
+            return this.request;
         }
     };
+}, window.rhubarb.viewBridgeClasses.SimpleFileUploadViewBridge);
 
-    upiGauge.appendChild(upiNeedle);
-
-    upiDom.appendChild(upiGauge);
-    upiDom.appendChild(upiLabel);
-    upiDom.appendChild(cancel);
-
-    // Put the sub elements on the parent as direct children for faster access later.
-    upiDom.upiNeedle = upiNeedle;
-    upiDom.upiLabel = upiLabel;
-    upiDom.cancel = cancel;
-    return upiDom;
-};
-
-bridge.prototype.attachUploadProgressIndicator = function (progressIndicator) {
-    this.uploadProgressIndicatorContainer.appendChild(progressIndicator);
-};
-
-/**
- * Updates the DOM for a progress indicator to reflect the progress passed to it.
- *
- * @param progressIndicator the DOM node created in createUploadProgressIndicator
- * @param progressDetails An object containing name, length, position and percentage properties
- */
-bridge.prototype.updateUploadProgressIndicator = function (progressIndicator, progressDetails) {
-    progressIndicator.upiNeedle.style.width = progressDetails.percentage + "%";
-    progressIndicator.upiLabel.innerHTML = this.getLabelHtml(progressDetails);
-    this.viewNode.style.display = "none";
-};
-
-bridge.prototype.getLabelHtml = function (progressDetails) {
-    if (this.model.displayType == "") {
-        return "";
-    } else if (this.model.displayType == "percentage") {
-        return "progress: " + progressDetails.percentage + "%";
-    } else if (this.model.displayType == "filename") {
-        return "uploading " + progressDetails.name + " now";
-    } else {
-        return "speed: " + progressDetails.speed;
-    }
-};
-
-/**
- * Called when an upload is complete. Provides an opportunity to remove a progress indicator.
- *
- * @param progressIndicator
- */
-bridge.prototype.onUploadComplete = function (progressIndicator) {
-    this.addClass(progressIndicator, "-is-complete");
-    this.removeClass(progressIndicator.upiNeedle, "_needle");
-    this.removeClass(progressIndicator.cancel, "cancel");
-    progressIndicator.cancel.style.display = "none";
-    progressIndicator.upiLabel.innerHTML = "Complete";
-    var self = this;
-    setTimeout(function () {
-        progressIndicator.parentNode.removeChild(progressIndicator);
-        self.viewNode.style.display = "block";
-    }, 1500);
-};
-
-bridge.prototype.addClass = function (nodes, className) {
-    if (!nodes.length) {
-        nodes = [nodes];
-    }
-
-    for (var n = 0, m = nodes.length; n < m; n++) {
-        var node = nodes[n];
-
-        if ((" " + node.className + " ").indexOf(" " + className + " ") == -1) {
-            node.className += " " + className;
-        }
-    }
-};
-
-bridge.prototype.removeClass = function (nodes, className) {
-    if (!nodes.length) {
-        nodes = [nodes];
-    }
-
-    for (var n = 0, m = nodes.length; n < m; n++) {
-        var node = nodes[n];
-        node.className = node.className.replace(className, '').trim();
-    }
-};
-
-window.rhubarb.viewBridgeClasses.Html5FileUploadViewBridge = bridge;
+//bridge.prototype = new window.rhubarb.viewBridgeClasses.SimpleFileUploadViewBridge();
