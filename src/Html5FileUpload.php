@@ -32,6 +32,36 @@ class Html5FileUpload extends SimpleFileUpload
         return new Html5FileUploadModel();
     }
 
+    public function setAllowMultipleUploads($allow)
+    {
+        $this->model->allowMultipleUploads = $allow;
+    }
+
+    public function getIndicators()
+    {
+        return $this->model->indicators;
+    }
+
+    public function setIndicators(Html5FileUploadIndicators $indicators)
+    {
+        $this->model->indicators = $indicators;
+    }
+
+    public function setShowUploadingFileName($show)
+    {
+        $this->model->showUploadingFileName = $show;
+    }
+
+    public function setShowUploadingTimeRemaining($show)
+    {
+        $this->model->showUploadingTimeRemaining = $show;
+    }
+
+    public function setShowUploadingFileCount($show)
+    {
+        $this->model->showUploadingFileCount = $show;
+    }
+
     protected function onModelCreated()
     {
         parent::onModelCreated();

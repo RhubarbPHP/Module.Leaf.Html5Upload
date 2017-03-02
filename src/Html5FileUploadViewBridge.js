@@ -2,7 +2,7 @@
 window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
     return {
         onReady: function () {
-            parent.onReady();
+            parent.onReady.call(this);
             if (this.supportsHtml5Uploads()) {
 
                 this.originalFileInput = this.viewNode;
@@ -106,18 +106,31 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
             cancel.onclick = function () {
                 var confirmAbort = confirm("Are you sure you want to cancel the upload?");
                 if (confirmAbort) {
+                    self.uploading = false;
                     self.request.abort();
-                    this.clearQueue();
-                    this.updateDom();
+                    self.clearQueue();
+                    self.updateDom();
+
+                    self.raiseClientEvent("UploadCancelled")
                 }
             };
 
             upiGauge.appendChild(upiNeedle);
 
-            upiDetails.appendChild(upiLabel);
-            upiDetails.appendChild(upiSpeed);
-            upiDetails.appendChild(upiRemaining);
-            upiDetails.appendChild(upiOverall);
+            if (this.model.indicators.currentFileName) {
+                upiDetails.appendChild(upiLabel);
+            }
+
+            if (this.model.indicators.uploadSpeed) {
+                upiDetails.appendChild(upiSpeed);
+            }
+            if (this.model.indicators.timeRemaining) {
+                upiDetails.appendChild(upiRemaining);
+            }
+
+            if (this.model.indicators.overallProgress && this.model.allowMultipleUploads) {
+                upiDetails.appendChild(upiOverall);
+            }
 
             upiDom.appendChild(upiGauge);
             upiDom.appendChild(upiDetails);
@@ -244,6 +257,8 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
                 "remaining": false
             };
 
+            this.raiseClientEvent("UploadStarted", file);
+
             this.request = this.sendFileAsServerEvent(
                 "fileUploaded",
                 file,
@@ -269,11 +284,14 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
                         "remaining": this.calculateSecondsRemaining(speed, e.total - e.loaded)
                     };
 
+                    this.raiseClientEvent("ProgressReported", file, file.progress);
+
                     this.updateDom();
                 }.bind(this),
                 // On complete
                 function (response) {
                     if (file.uploadProgressDom) {
+                        this.raiseClientEvent("UploadCompleted", file);
                         this.onUploadComplete(file.uploadProgressDom);
                     }
 
