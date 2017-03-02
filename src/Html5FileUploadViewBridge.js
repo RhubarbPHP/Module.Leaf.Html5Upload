@@ -69,15 +69,17 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
 
             this.uploadNextFile();
         },
-        onUploadComplete: function (progressIndicator) {
-            progressIndicator.classList.add("-is-complete");
-            progressIndicator.cancel.style.display = "none";
-            progressIndicator.upiLabel.innerHTML = "Complete";
-            var self = this;
-            setTimeout(function () {
-                progressIndicator.parentNode.removeChild(progressIndicator);
-                self.viewNode.style.display = "block";
-            }, 1500);
+        onUploadComplete: function (response) {
+            if (this.uploadProgressIndicator) {
+                this.uploadProgressIndicator.classList.add("-is-complete");
+                this.uploadProgressIndicator.cancel.style.display = "none";
+                this.uploadProgressIndicator.label.innerHTML = "Upload complete";
+                var self = this;
+                setTimeout(function () {
+                    self.uploadProgressIndicator.parentNode.removeChild(self.uploadProgressIndicator);
+                    self.viewNode.style.display = "block";
+                }, 1500);
+            }
         },
         clearQueue: function(){
             this.activeUploadIndex = -1;
@@ -290,9 +292,9 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
                 }.bind(this),
                 // On complete
                 function (response) {
-                    if (file.uploadProgressDom) {
+                    if (file) {
                         this.raiseClientEvent("UploadCompleted", file);
-                        this.onUploadComplete(file.uploadProgressDom);
+                        this.onUploadComplete(file, response);
                     }
 
                     this.uploadNextFile();
@@ -303,7 +305,7 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
 
                     this.uploadNextFile();
                     this.raiseClientEvent("UploadFailed", file, response);
-                }
+                }.bind(this)
             );
 
             return this.request;

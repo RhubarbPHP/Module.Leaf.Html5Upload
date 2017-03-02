@@ -1,6 +1,9 @@
 window.rhubarb.vb.create("SingleHtml5FileUploadWithPersistenceViewBridge", function(parent){
   return {
     updateDom: function(){
+
+      parent.updateDom.call(this);
+
       if (this.model.value){
         this.viewNode.style.display = 'none';
         this.label.innerText = this.model.value;
@@ -12,8 +15,11 @@ window.rhubarb.vb.create("SingleHtml5FileUploadWithPersistenceViewBridge", funct
         this.label.style.display = 'none';
         this.button.style.display = 'none';
       }
-    }
-    ,
+    },
+    onUploadComplete: function(fileProgressDom, serverResponse){
+        this.model.value = serverResponse;
+        this.updateDom();
+    },
     onReady: function(){
       parent.onReady.call(this);
 
@@ -23,9 +29,12 @@ window.rhubarb.vb.create("SingleHtml5FileUploadWithPersistenceViewBridge", funct
       this.button = document.createElement("button");
       this.button.innerHTML = "<p>Change</p>";
       this.button.style = 'display: none;';
-      this.button.addEventListener('click', function(){
+      this.button.addEventListener('click', function(event){
           this.model.value = '';
           this.updateDom();
+
+          event.preventDefault();
+          return false;
       }.bind(this));
 
       this.viewNode.parentNode.insertBefore(this.button, this.viewNode);
