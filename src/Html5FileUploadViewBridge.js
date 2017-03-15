@@ -5,7 +5,7 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
             parent.onReady.call(this);
             if (this.supportsHtml5Uploads()) {
 
-                this.originalFileInput = this.viewNode;
+                this.originalFileInput = this.viewNode.querySelector("input[type=file]");
 
                 // An array of files to upload.
                 this.filesToUpload = [];
@@ -69,6 +69,11 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
 
             this.uploadNextFile();
         },
+        onUploadFailed: function (response) {
+            // There isn't any appropriate default behaviour for this so we don't provide any.
+            // AS it's an HTML 5 upload the user could have scrolled this control out of view
+            // so a JS alert would be inappropriate.
+        },
         onUploadComplete: function (response) {
             if (this.uploadProgressIndicator) {
                 this.uploadProgressIndicator.classList.add("-is-complete");
@@ -77,7 +82,7 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
                 var self = this;
                 setTimeout(function () {
                     self.uploadProgressIndicator.parentNode.removeChild(self.uploadProgressIndicator);
-                    self.viewNode.style.display = "block";
+                    self.originalFileInput.style.display = "block";
                 }, 1500);
             }
         },
@@ -302,7 +307,7 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
                 }.bind(this),
                 // On failure
                 function (response) {
-
+                    this.onUploadFailed(file, response);
                     this.uploadNextFile();
                     this.raiseClientEvent("UploadFailed", file, response);
                 }.bind(this)
