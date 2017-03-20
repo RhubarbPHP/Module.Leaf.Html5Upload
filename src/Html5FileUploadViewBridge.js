@@ -22,7 +22,7 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
         },
         createUploadProgressIndicatorContainer: function () {
             this.uploadProgressIndicatorContainer = document.createElement("div");
-            this.uploadProgressIndicatorContainer.className = "upload-progress-container";
+            this.uploadProgressIndicatorContainer.className = "c-file-upload-container";
 
             this.originalFileInput.parentNode.insertBefore(
                 this.uploadProgressIndicatorContainer,
@@ -88,22 +88,28 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
         createUploadProgressIndicator: function () {
             var self = this;
             var upiDom = document.createElement("div");
-            upiDom.className = "upload-progress";
+            upiDom.className = "c-file-upload upload-progress";
 
             var upiGauge = document.createElement("div");
-            upiGauge.className = "_gauge";
+            upiGauge.className = "c-file-upload__progress _gauge";
 
             var upiNeedle = document.createElement("div");
-            upiNeedle.className = "_needle";
+            upiNeedle.className = "c-file-upload__progress-bar _needle";
 
-            var upiDetails = document.createElement('div');
             var upiLabel = document.createElement("span");
-            var upiSpeed = document.createElement("span");
-            var upiOverall = document.createElement("span");
-            var upiRemaining = document.createElement("span");
+            upiLabel.className = "c-file-upload__label";
 
-            var cancel = document.createElement("a");
-            cancel.className = "c-button c-button--neg c-button--small cancel";
+            var upiSpeed = document.createElement("span");
+            upiSpeed.className = "c-file-upload__speed";
+
+            var upiOverall = document.createElement("span");
+            upiOverall.className = "c-file-upload__overall";
+
+            var upiRemaining = document.createElement("span");
+            upiRemaining.className = "c-file-upload__remaining";
+
+            var cancel = document.createElement("button");
+            cancel.className = "c-file-upload__button";
             cancel.innerHTML = "Cancel Upload";
             cancel.onclick = function () {
                 var confirmAbort = confirm("Are you sure you want to cancel the upload?");
@@ -117,30 +123,32 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
                 }
             };
 
-            upiGauge.appendChild(upiNeedle);
 
             if (this.model.indicators.currentFileName) {
-                upiDetails.appendChild(upiLabel);
+                upiDom.appendChild(upiLabel);
             }
 
             if (this.model.indicators.uploadSpeed) {
-                upiDetails.appendChild(upiSpeed);
+                upiDom.appendChild(upiSpeed);
             }
+
+            upiGauge.appendChild(upiNeedle);
+
+            upiDom.appendChild(upiGauge);
+
             if (this.model.indicators.timeRemaining) {
-                upiDetails.appendChild(upiRemaining);
+                upiDom.appendChild(upiRemaining);
             }
 
             if (this.model.indicators.overallProgress && this.model.allowMultipleUploads) {
-                upiDetails.appendChild(upiOverall);
+                upiDom.appendChild(upiOverall);
             }
 
-            upiDom.appendChild(upiGauge);
-            upiDom.appendChild(upiDetails);
             upiDom.appendChild(cancel);
+
 
             // Put the sub elements on the parent as direct children for faster access later.
             upiDom.needle = upiNeedle;
-            upiDom.details = upiDetails;
             upiDom.speed = upiSpeed;
             upiDom.overall = upiOverall;
             upiDom.label = upiLabel;
