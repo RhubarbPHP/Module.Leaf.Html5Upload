@@ -19,9 +19,12 @@ class SingleUploadExampleView extends View
         $upload->setAllowMultipleUploads(false);
     }
 
-    protected function getAdditionalResourceUrls()
+    public function getDeploymentPackage()
     {
-        return [__DIR__.'/styles.css'];
+        $package = parent::getDeploymentPackage();
+        $package->resourcesToDeploy[] =  __DIR__.'/styles.css';
+
+        return $package;
     }
 
     protected function printViewContent()
