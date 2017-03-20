@@ -5,16 +5,19 @@ window.rhubarb.vb.create("SingleHtml5FileUploadWithPersistenceViewBridge", funct
       parent.updateDom.call(this);
 
       if (this.model.value){
-        this.viewNode.style.display = 'none';
+        this.originalFileInput.style.display = 'none';
         this.label.innerText = this.model.value;
         this.label.style.display = 'inline';
         this.button.style.display = 'block';
       } else {
-        this.viewNode.style.display = 'inline';
+        this.originalFileInput.style.display = 'inline';
         this.label.innerText = this.model.value;
         this.label.style.display = 'none';
         this.button.style.display = 'none';
       }
+    },
+    onUploadFailed: function (response) {
+        this.viewNode.classList.add("has-failed");
     },
     onUploadComplete: function(fileProgressDom, serverResponse){
         this.model.value = serverResponse;
@@ -37,8 +40,8 @@ window.rhubarb.vb.create("SingleHtml5FileUploadWithPersistenceViewBridge", funct
           return false;
       }.bind(this));
 
-      this.viewNode.parentNode.insertBefore(this.button, this.viewNode);
-      this.viewNode.parentNode.insertBefore(this.label, this.button);
+      this.viewNode.insertBefore(this.button, this.originalFileInput);
+      this.viewNode.insertBefore(this.label, this.button);
 
       this.updateDom();
     }

@@ -27,7 +27,7 @@ class Html5FileUploadView extends SimpleFileUploadView
      */
     protected $model;
 
-    protected $requiresContainer = true;
+    protected $requiresContainerDiv = true;
     protected $requiresStateInputs = true;
 
     protected function getViewBridgeName()
