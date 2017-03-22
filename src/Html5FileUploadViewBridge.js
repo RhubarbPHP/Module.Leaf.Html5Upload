@@ -306,7 +306,7 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
                 // On complete
                 function (response) {
                     if (file) {
-                        this.raiseClientEvent("UploadCompleted", file);
+                        this.raiseClientEvent("UploadCompleted", file, response);
                         this.onUploadComplete(file, response);
                     }
 
