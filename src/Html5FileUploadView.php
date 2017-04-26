@@ -50,9 +50,4 @@ class Html5FileUploadView extends SimpleFileUploadView
 
         parent::printViewContent();
     }
-
-    protected function getInputName()
-    {
-        return $this->model->leafPath . '[]';
-    }
 }
