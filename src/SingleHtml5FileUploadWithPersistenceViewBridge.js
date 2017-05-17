@@ -15,17 +15,28 @@ window.rhubarb.vb.create("SingleHtml5FileUploadWithPersistenceViewBridge", funct
         this.label.style.display = 'none';
         this.button.style.display = 'none';
       }
+
+      if (this.uploading){
+        this.originalFileInput.style.display = 'none';
+      }
     },
     extractFileName: function(filePath) {
         var parts = filePath.split(/\//);
 
         return parts[parts.length-1];
     },
+    onUploadStarted: function(file){
+        this.uploading = true;
+        this.updateDom();
+    },
     onUploadFailed: function (response) {
         this.viewNode.classList.add("has-failed");
+        this.uploading = false;
+        this.updateDom();
     },
     onUploadComplete: function(fileProgressDom, serverResponse){
         this.model.value = serverResponse;
+        this.uploading = false;
         this.updateDom();
     },
     onReady: function(){

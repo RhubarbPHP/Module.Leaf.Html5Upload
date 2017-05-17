@@ -69,6 +69,9 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
 
             this.uploadNextFile();
         },
+        onUploadStarted: function (file) {
+
+        },
         onUploadFailed: function (response) {
             // There isn't any appropriate default behaviour for this so we don't provide any.
             // AS it's an HTML 5 upload the user could have scrolled this control out of view
@@ -272,6 +275,7 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
                 "remaining": false
             };
 
+            this.onUploadStarted(file);
             this.raiseClientEvent("UploadStarted", file);
 
             this.request = this.sendFileAsServerEvent(
