@@ -282,10 +282,9 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
                 }.bind(this),
                 // On failure
                 function (response) {
-
                     this.uploadNextFile();
                     this.raiseClientEvent("UploadFailed", file, response);
-                }
+                }.bind(this)
             );
 
             return this.request;

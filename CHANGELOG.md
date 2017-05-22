@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 1.0.2
+
+* Fixed: Raising of UploadFailed event.
+
 ### 1.0.1
 
 * Changed: Can now be used to select multiple files to upload at once
