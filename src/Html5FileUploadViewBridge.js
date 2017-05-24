@@ -84,8 +84,7 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
                 this.uploadProgressIndicator.label.innerHTML = "Upload complete";
                 var self = this;
                 setTimeout(function () {
-                    self.uploadProgressIndicator.parentNode.removeChild(self.uploadProgressIndicator);
-                    self.originalFileInput.style.display = "block";
+                    self.updateDom();
                 }, 1500);
             }
         },
