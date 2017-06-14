@@ -1,8 +1,13 @@
 # CHANGELOG
 
+### 1.1.0
+
+* Added:   DragAndDropHtml5FileUpload
+* Added:   SingleHtml5UploadWithPersistence
+
 ### 1.0.2
 
-* Fixed: Raising of UploadFailed event.
+* Fixed:   Raising of UploadFailed event.
 
 ### 1.0.1
 
