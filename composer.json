@@ -15,7 +15,8 @@
   "license": "Apache-2.0",
   "autoload": {
     "psr-4": {
-      "Rhubarb\\Leaf\\Controls\\Html5Upload\\": "src/"
+      "Rhubarb\\Leaf\\Controls\\Html5Upload\\": "src/",
+      "Rhubarb\\Leaf\\Controls\\Html5Upload\\Examples\\": "docs/examples/"
     }
   },
   "require": {

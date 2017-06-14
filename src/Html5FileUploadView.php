@@ -22,7 +22,12 @@ use Rhubarb\Leaf\Controls\Common\FileUpload\SimpleFileUploadView;
 
 class Html5FileUploadView extends SimpleFileUploadView
 {
-    protected $requiresContainer = true;
+    /**
+     * @var Html5FileUploadModel
+     */
+    protected $model;
+
+    protected $requiresContainerDiv = true;
     protected $requiresStateInputs = true;
 
     protected function getViewBridgeName()
@@ -39,13 +44,10 @@ class Html5FileUploadView extends SimpleFileUploadView
 
     protected function printViewContent()
     {
-        $this->model->addHtmlAttribute('multiple', 'multiple');
+        if ($this->model->allowMultipleUploads) {
+            $this->model->addHtmlAttribute('multiple', 'multiple');
+        }
 
         parent::printViewContent();
-    }
-
-    protected function getInputName()
-    {
-        return $this->model->leafPath . '[]';
     }
 }

@@ -1,1 +1,1 @@
-. Html5Upload: html5upload
+. Html5FileUpload: html5upload

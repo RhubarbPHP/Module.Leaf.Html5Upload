@@ -31,17 +31,26 @@ class Html5FileUploadModel extends SimpleFileUploadModel
     
     public $progressLabelType = null;
 
+    public $allowMultipleUploads = true;
+
+    /**
+     * @var Html5FileUploadIndicators
+     */
+    public $indicators = null;
+
     public function __construct()
     {
         parent::__construct();
 
+        $this->indicators = new Html5FileUploadIndicators();
         $this->fileUploadedEvent = new Event();
     }
 
     protected function getExposableModelProperties()
     {
         $list = parent::getExposableModelProperties();
-        $list[] = "displayType";
+        $list[] = "allowMultipleUploads";
+        $list[] = "indicators";
 
         return $list;
     }
