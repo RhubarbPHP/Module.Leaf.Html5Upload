@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 1.1.1
+
+* Fixed:   Fix to support reRender of hosting parent
+
 ### 1.1.0
 
 * Added:   DragAndDropHtml5FileUpload
