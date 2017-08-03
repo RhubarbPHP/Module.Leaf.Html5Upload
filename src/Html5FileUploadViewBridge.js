@@ -1,8 +1,8 @@
 
 window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
     return {
-        onReady: function () {
-            parent.onReady.call(this);
+        attachEvents: function () {
+            parent.attachEvents.call(this);
             if (this.supportsHtml5Uploads()) {
 
                 this.originalFileInput = this.viewNode.querySelector("input[type=file]");
