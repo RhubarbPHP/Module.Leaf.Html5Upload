@@ -14,6 +14,7 @@ rhubarb.vb.create('DragAndDropHtml5FileUploadViewBridge', function(parent){
         },
         onDragLeave: function() {
             this.isDragActive = true;
+            this.viewNode.querySelector('.c-dropzone').classList.remove('is-dragged');
             this.updateDom();
         },
 
@@ -21,11 +22,13 @@ rhubarb.vb.create('DragAndDropHtml5FileUploadViewBridge', function(parent){
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
             this.isDragActive = true;
+            this.viewNode.querySelector('.c-dropzone').classList.add('is-dragged');
             this.updateDom();
         },
 
         onDrop: function(e) {
             e.preventDefault();
+            this.viewNode.querySelector('.c-dropzone').classList.remove('is-dragged');
 
             this.isDragActive = false;
             this.updateDom();
@@ -61,7 +64,7 @@ rhubarb.vb.create('DragAndDropHtml5FileUploadViewBridge', function(parent){
         },
         setupDragDropContainer: function(){
             this.dragDropContainer = document.createElement('div');
-            this.dragDropContainer.className = 'c-dropzone';
+            this.dragDropContainer.className = 'c-dropzone u-padding--heavy';
 
             this.dragDropContainer.addEventListener('dragleave', function(e){
                 this.onDragLeave(e);
@@ -76,14 +79,12 @@ rhubarb.vb.create('DragAndDropHtml5FileUploadViewBridge', function(parent){
             }.bind(this));
 
             this.dragDropLabelContainer = document.createElement('div');
-            this.dragDropLabelContainer.className = 'c-dropzone__text';
-            this.dragDropLabelContainer.innerHTML = "<b>Drag and drop your file here</b>";
+            this.dragDropLabelContainer.className = 'c-dropzone__text u-marg-bottom-half';
+            this.dragDropLabelContainer.innerHTML = "<div><span class='c-icon c-icon--file_upload u-epsilon u-primary'></span></div><div><b>Drag and drop your file here</b></div>";
 
             this.dragDropContainer.appendChild(this.dragDropLabelContainer);
 
             this.dragDropIcon = document.createElement('div');
-            this.dragDropIcon.className = "c-dropzone__icon";
-            this.dragDropIcon.innerHTML = '<div class="c-dropzone__icon--inner"></div>';
 
             this.dragDropContainer.appendChild(this.dragDropIcon);
 

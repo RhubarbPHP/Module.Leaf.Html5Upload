@@ -1,4 +1,8 @@
 # CHANGELOG
+### 1.1.2
+
+* Changed:  Layout of DragAndDropHtml5FileUploadViewBridge 
+* Added:    add / remove class is-dragged
 
 ### 1.1.1
 
