@@ -22,7 +22,7 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
         },
         createUploadProgressIndicatorContainer: function () {
             this.uploadProgressIndicatorContainer = document.createElement("div");
-            this.uploadProgressIndicatorContainer.className = "c-file-upload-container";
+            this.uploadProgressIndicatorContainer.className = "c-file-upload-container u-padding--heavy";
 
             this.originalFileInput.parentNode.insertBefore(
                 this.uploadProgressIndicatorContainer,
@@ -328,5 +328,3 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
         }
     };
 }, window.rhubarb.viewBridgeClasses.SimpleFileUploadViewBridge);
-
-//bridge.prototype = new window.rhubarb.viewBridgeClasses.SimpleFileUploadViewBridge();

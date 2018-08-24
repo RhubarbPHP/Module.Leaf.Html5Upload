@@ -1,4 +1,7 @@
 # CHANGELOG
+### 1.1.3
+* Changed:  Added class of u-padding--heavy to uploadProgressIndicatorContainer in Html5FileUploadViewBridge        
+
 ### 1.1.2
 
 * Changed:  Layout of DragAndDropHtml5FileUploadViewBridge 
