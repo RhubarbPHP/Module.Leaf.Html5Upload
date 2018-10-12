@@ -1,9 +1,15 @@
 # CHANGELOG
 
+### 1.1.5
+
+* Fixed:    Progress bar wasn't representing after first upload
+
 ### 1.1.4
+
 * Changed:  Remove progress bar when upload completed
 
 ### 1.1.3
+
 * Changed:  Added class of u-padding--heavy to uploadProgressIndicatorContainer in Html5FileUploadViewBridge        
 
 ### 1.1.2
