@@ -44,6 +44,7 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
 
                 if (this.uploadProgressIndicator) {
                     this.uploadProgressIndicator.parentNode.removeChild(this.uploadProgressIndicator);
+                    this.uploadProgressIndicator = false;
                 }
 
                 this.originalFileInput.style.display = 'block';
