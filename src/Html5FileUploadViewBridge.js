@@ -326,6 +326,9 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
             );
 
             return this.request;
+        },
+        setAcceptedFileTypes: function (filters) {
+            this.originalFileInput.setAttribute('accept', filters.join(','));
         }
     };
 }, window.rhubarb.viewBridgeClasses.SimpleFileUploadViewBridge);
