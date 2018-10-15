@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 1.1.6
+
+* Changed:  Can now set Accepted file types on the client side
+
 ### 1.1.5
 
 * Fixed:    Progress bar wasn't representing after first upload
