@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 1.1.6
+
+* Added:    Filename sanitisation for Html5FileUploadViewBridge.
+
 ### 1.1.5
 
 * Fixed:    Progress bar wasn't representing after first upload

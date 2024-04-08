@@ -265,9 +265,11 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
 
             this.uploading = true;
 
+            var sanitisedFileName = file.name.replace(/[^a-z0-9]/gi, '_');
+
             // Put a progress structure onto the file upload itself.
             file.progress = {
-                "name": file.name,
+                "name": sanitisedFileName,
                 "position": 0,
                 "length": file.length,
                 "percentage": 0,
@@ -295,7 +297,7 @@ window.rhubarb.vb.create("Html5FileUploadViewBridge", function(parent){
 
                     // Update progress structure on the file upload itself.
                     file.progress = {
-                        "name": file.name,
+                        "name": sanitisedFileName,
                         "position": e.loaded,
                         "length": e.total,
                         "percentage": parseInt(( e.loaded / e.total ) * 100),
